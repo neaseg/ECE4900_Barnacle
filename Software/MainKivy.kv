@@ -1,0 +1,34 @@
+ScreenManagement:
+    transition: 
+    HomePage:
+    Contact:
+    Dial:
+
+<HomePage>:
+    name: 'Welcome To Timber'
+     
+    Button:
+        on_release: app.root.current = 'Contacts'
+        text: 'Contacts'
+        font_size: 20
+
+    Button:
+        on_release: app.root.current = 'Dial'
+        text: 'Dial 911'
+        font_size: 20
+
+<Contact>:
+    name: 'Contacts'
+
+    Button:
+        on_release: app.root.current = 'Welcome to Timber'
+        text: 'Home'
+        font_size: 10
+
+<Dial>:
+    name: 'Dial 911'
+
+    Button:
+        on_release: app.root.current = 'Welcome to Timber'
+        text: 'Home'
+        font_size: 10
