@@ -143,7 +143,7 @@ Builder.load_string("""
 			multiline: False
 			size_hint: 0.5,0.33
 			pos_hint: {"right":1, "top":0.66}
-		Button:
+		UserInput_HomeButon:
 			uinfo_first: FirstName.text
 			uinfo_last: LastName.text
 			color: 1,1,1,1
@@ -206,7 +206,7 @@ Builder.load_string("""
 			text: "Write your own message"
 			size_hint: 0.8,0.2
 			pos_hint: {"right":0.8, "top":0.4}
-		HomeButton:
+		TextInput_HomeButton:
 			message_sel: message1
 			color: 1,1,1,1
 			font_size: 25
@@ -215,7 +215,7 @@ Builder.load_string("""
 			sms_message: message1.text
 			on_release: app.root.current = "main"
 			pos_hint: {"right":1, "top":1}
-		HomeButton:
+		TextInput_HomeButton:
 			message_sel: message2
 			color: 1,1,1,1
 			font_size: 25
@@ -224,7 +224,7 @@ Builder.load_string("""
 			sms_message: message2.text
 			on_release: app.root.current = "main"
 			pos_hint: {"right":1, "top":0.8}
-		HomeButton:
+		TextInput_HomeButton:
 			message_sel: message3
 			color: 1,1,1,1
 			font_size: 25
@@ -233,7 +233,7 @@ Builder.load_string("""
 			sms_message: message3.text
 			on_release: app.root.current = "main"
 			pos_hint: {"right":1, "top":0.6}
-		HomeButton:
+		TextInput_HomeButton:
 			color: 1,1,1,1
 			font_size: 25
 			size_hint: 0.2,0.2
@@ -296,7 +296,7 @@ Builder.load_string("""
 			multiline: False
 			size_hint: 0.5,0.2
 			pos_hint: {"right":1, "top":0.4}
-		HomeButton:
+		Contact_Home_Button:
 			contact_num1: contact1.text
 			contact_num2: contact2.text
 			contact_num3: contact3.text
@@ -309,24 +309,6 @@ Builder.load_string("""
 			pos_hint: {"right":1, "top":0.2}
 
 """)
-
-
-# Create the class for each page
-class HomeButton(Button):
-	# User Info
-	uinfo_first = StringProperty()
-	uinfo_last = StringProperty()
-
-	# Contact Inputs
-	contact_num1 = StringProperty()
-	contact_num2 = StringProperty()
-	contact_num3 = StringProperty()
-	contact_num4 = StringProperty()
-
-	# User Input Text Message
-	sms_message = StringProperty()
-
-
 class HomePage(Screen):
 	pass
 
@@ -351,12 +333,34 @@ class TextMessages(Screen):
 class ScreenManagement(ScreenManager):
 	pass
 
+# Create the class for each page
+class Contact_Home_Button(Button):
+	test_number = "16148057073"
+	# Contact Inputs
+	contact_num1 = StringProperty()
+	contact_num2 = StringProperty()
+	contact_num3 = StringProperty()
+	contact_num4 = StringProperty()
+
+
+
+class TextInput_HomeButton(Button):
+	# User Input Text Message
+	sms_message = StringProperty()
+
+class UserInput_HomeButon(Button):
+	# User Info
+	uinfo_first = StringProperty()
+	uinfo_last = StringProperty()
+
 class IntentButton(Button):
-	message = HomeButton.sms_message
-	Numbers = [HomeButton.contact_num1,HomeButton.contact_num2,HomeButton.contact_num3,HomeButton.contact_num4]
-	number = HomeButton.contact_num1
+	message = TextInput_HomeButton.sms_message
+	Numbers = [Contact_Home_Button.contact_num1,
+			   Contact_Home_Button.contact_num2,
+			   Contact_Home_Button.contact_num3,
+			   Contact_Home_Button.contact_num4]
 	def send_text_message(self, *args):
-			  backend.send_sms(self.number,self.message)
+			  backend.send_sms(Contact_Home_Button.test_number,TextInput_HomeButton.sms_message)
 
 
 
