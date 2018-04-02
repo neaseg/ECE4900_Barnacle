@@ -12,15 +12,7 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.button import Button
 from kivy.properties import StringProperty, ObjectProperty
 from kivy.uix.widget import Widget
-from twilio.rest import Client
-
-# Find these values at https://twilio.com/user/account
-account_sid = "AC63957f26fab90921c4d410f722425ab7"
-auth_token = "89191cd5fa173f9a4e4539adf33ec27c"
-
-client = Client(account_sid, auth_token)
-contacts= []
-
+import backend
 
 Builder.load_string("""
 <HomePage>:
@@ -180,6 +172,11 @@ Builder.load_string("""
 			on_release: app.root.current = "main"
 			pos_hint: {"right":0.5, "bottom":1}
 <TextMessages>:
+	message1: 'Your loved one is in distress, and needs immediate medical attention.'
+	message2: 'Your loved one is in distress, and needs immediate medical attention.'
+	message3: "The user has collapsed and requires immediate medical attention"
+	message4: _message4.text
+	sms_message: ''
 	FloatLayout:
 		Label:
 			id: message1
@@ -192,7 +189,7 @@ Builder.load_string("""
 			id: message2
 			color: 1,1,1,1
 			font_size: 20
-			text: "An individual is in distress and seeks immediate medical attention."
+			text: "Your loved one is in distress, and needs immediate medical attention."
 			size_hint: 0.8,0.2
 			pos_hint: {"right":0.8, "top":0.8}
 		Label:
@@ -203,11 +200,11 @@ Builder.load_string("""
 			size_hint: 0.8,0.2
 			pos_hint: {"right":0.8, "top":0.6}
 		TextInput:
-			id: message4
+			id: _message4
 			color: 1,1,1,1
 			font_size: 20
 			multiline: True
-			text: "Write your own message"
+			text: root.message4
 			size_hint: 0.8,0.2
 			pos_hint: {"right":0.8, "top":0.4}
 		TextInput_HomeButton:
@@ -216,7 +213,7 @@ Builder.load_string("""
 			font_size: 25
 			size_hint: 0.2,0.2
 			text: "Select"
-			sms_message: message1.text
+			on_press: root.message1_update()
 			on_release: app.root.current = "main"
 			pos_hint: {"right":1, "top":1}
 		TextInput_HomeButton:
@@ -225,7 +222,7 @@ Builder.load_string("""
 			font_size: 25
 			size_hint: 0.2,0.2
 			text: "Select"
-			sms_message: message2.text
+			on_press: root.message2_update()
 			on_release: app.root.current = "main"
 			pos_hint: {"right":1, "top":0.8}
 		TextInput_HomeButton:
@@ -234,7 +231,7 @@ Builder.load_string("""
 			font_size: 25
 			size_hint: 0.2,0.2
 			text: "Select"
-			sms_message: message3.text
+			on_press: root.message3_update()
 			on_release: app.root.current = "main"
 			pos_hint: {"right":1, "top":0.6}
 		TextInput_HomeButton:
@@ -242,7 +239,7 @@ Builder.load_string("""
 			font_size: 25
 			size_hint: 0.2,0.2
 			text: "Select"
-			sms_message: message4.text
+			on_press: root.message4_update()
 			on_release: app.root.current = "main"
 			pos_hint: {"right":1, "top":0.4}
 
@@ -345,8 +342,24 @@ class ContactInput(Screen):
 
 
 class TextMessages(Screen):
-	# User Input Text Message
-	sms_message = StringProperty()
+	message1 = 'Your loved one is in distress, and needs immediate medical attention.'
+	message2 = 'Your loved one is in distress, and needs immediate medical attention.'
+	message3 = "The user has collapsed and requires immediate medical attention"
+
+	def message1_update(self, *args):
+		Main.message = self.message1
+
+	def message2_update(self, *args):
+		Main.message = self.message2
+
+	def message3_update(self, *args):
+		Main.message = self.message3
+
+	def message4_update(self, *args):
+		Main.message = self.message4
+
+	def update(self,*args):
+		Main.message = self.message4
 
 class ScreenManagement(ScreenManager):
 	pass
@@ -363,10 +376,7 @@ class UserInput_HomeButon(Button):
 
 class IntentButton(Button):
 	def send_text_message(self, *args):
-			client.api.account.messages.create(
-			    to=Main.contacts[0],
-			    from_="+13522928542",
-			    body="thisisnew")
+			backend.send_sms(Main.contacts[0],Main.message)
 
 
 
@@ -382,6 +392,7 @@ screen_manager.add_widget(TextMessages(name="t_input"))
 # The class name must match the .kv file name
 class Main(App):
 	contacts = ['','','','']
+	message = ''
 	def build(self):
 		return screen_manager
 
