@@ -4,7 +4,6 @@ lights up LED when data sent from phone to arduino
 sends data to phone when button pressed
 LED on pin 5, button on pin 6
 **********/
-
 #include <Arduino.h>
 #include <SPI.h>
 #include "Adafruit_BLE.h"
@@ -16,11 +15,9 @@ LED on pin 5, button on pin 6
 #if SOFTWARE_SERIAL_AVAILABLE
   #include <SoftwareSerial.h>
 #endif
-//pins 5 and 6 are free
-int led = 5;
+
 /*=========================================================================
     APPLICATION SETTINGS
-
     FACTORYRESET_ENABLE       Perform a factory reset when running this sketch
    
                               Enabling this will put your Bluefruit LE module
@@ -57,7 +54,6 @@ int led = 5;
 // Create the bluefruit object, either software serial...uncomment these lines
 /*
 SoftwareSerial bluefruitSS = SoftwareSerial(BLUEFRUIT_SWUART_TXD_PIN, BLUEFRUIT_SWUART_RXD_PIN);
-
 Adafruit_BluefruitLE_UART ble(bluefruitSS, BLUEFRUIT_UART_MODE_PIN,
                       BLUEFRUIT_UART_CTS_PIN, BLUEFRUIT_UART_RTS_PIN);
 */
@@ -86,15 +82,22 @@ void error(const __FlashStringHelper*err) {
             automatically on startup)
 */
 /**************************************************************************/
+//initialize pins for the push button
+
+int inPin = 6;   //input pin for pushbutton
+int pinStat = 0; //variable for reading pin status
+int i = 0;       //loop variable 
+
 void setup(void)
 {
-  pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(led, OUTPUT);
-  while (!Serial);  // required for Flora & Micro
+ {
+  pinMode(inPin, INPUT); //declare pushbutton as input
+ }
+  //while (!Serial);  // required for Flora & Micro
   delay(500);
 
   Serial.begin(115200);
-  Serial.println(F("Adafruit Bluefruit Command Mode Example"));
+  Serial.println(F("Button Data Send Test"));
   Serial.println(F("---------------------------------------"));
 
   /* Initialise the module */
@@ -122,9 +125,9 @@ void setup(void)
   /* Print Bluefruit information */
   ble.info();
 
-  Serial.println(F("Please use Adafruit Bluefruit LE app to connect in UART mode"));
+  /* Serial.println(F("Please use Adafruit Bluefruit LE app to connect in UART mode"));
   Serial.println(F("Then Enter characters to send to Bluefruit"));
-  Serial.println();
+  Serial.println(); */
 
   ble.verbose(false);  // debug info is a little annoying after this point!
 
@@ -142,73 +145,27 @@ void setup(void)
     ble.sendCommandCheckOK("AT+HWModeLED=" MODE_LED_BEHAVIOUR);
     Serial.println(F("******************************"));
   }
+
 }
 
 /**************************************************************************/
 /*!
-    @brief  Constantly poll for new command or response data
+    @brief  Constantly poll for button press
 */
 /**************************************************************************/
 void loop(void)
 {
-  // Check for user input
-  char inputs[BUFSIZE+1];
-
-
-  if ( getUserInput(inputs, BUFSIZE) )
-  {
-    // Send characters to Bluefruit
-    Serial.print("[Send] ");
-    Serial.println(inputs);
-
+ pinStat = digitalRead(inPin); //read input pin
+ if (pinStat == HIGH){    //if the button is pressed
+  //for(i=0;i<5;i++){
+    delay(500);
     ble.print("AT+BLEUARTTX=");
-    ble.println(inputs);
-
+    ble.println(8);
+    
     // check response stastus
     if (! ble.waitForOK() ) {
       Serial.println(F("Failed to send?"));
-    } 
-  }
-  
-  // Check for incoming characters from Bluefruit
-  ble.println("AT+BLEUARTRX");
-  ble.readline();
-  if (strcmp(ble.buffer, "OK") == 0) {
-    // no data
-    return;
-  }
-  // Some data was found, its in the buffer
-  Serial.print(F("[Recv] ")); Serial.println(ble.buffer);
-  
-  if ( ble.waitForOK() ){
-    digitalWrite(led, HIGH);
-    delay(1000);
-    digitalWrite(led, LOW);
-  }
-}
-
-/**************************************************************************/
-/*!
-    @brief  Checks for user input (via the Serial Monitor)
-*/
-/**************************************************************************/
-bool getUserInput(char buffer[], uint8_t maxSize)
-{
-  // timeout in 100 milliseconds
-  TimeoutTimer timeout(100);
-
-  memset(buffer, 0, maxSize);
-  while( (!Serial.available()) && !timeout.expired() ) { delay(1); }
-
-  if ( timeout.expired() ) return false;
-
-  delay(2);
-  uint8_t count=0;
-  do
-  {
-    count += Serial.readBytes(buffer+count, maxSize);
-    delay(2);
-  } while( (count < maxSize) && (Serial.available()) );
-
-  return true;
+    }
+  pinStat = 0;
+ }
 }
