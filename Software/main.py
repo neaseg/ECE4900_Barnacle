@@ -2,10 +2,7 @@
 #import sys
 #import os.path
 #sys.path.append('/Users/allisonmack')
-
-
 import kivy
-
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
@@ -13,9 +10,16 @@ from kivy.uix.textinput import TextInput
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.button import Button
-from kivy.properties import StringProperty
+from kivy.properties import StringProperty, ObjectProperty
 from kivy.uix.widget import Widget
-import backend
+from twilio.rest import Client
+
+# Find these values at https://twilio.com/user/account
+account_sid = "AC63957f26fab90921c4d410f722425ab7"
+auth_token = "89191cd5fa173f9a4e4539adf33ec27c"
+
+client = Client(account_sid, auth_token)
+contacts= []
 
 
 Builder.load_string("""
@@ -251,6 +255,10 @@ Builder.load_string("""
 			pos_hint: {"right":1, "bottom":1}
 
 <ContactInput>:
+	contact1: _contact1.text
+	contact2: _contact2.text
+	contact3: _contact3.text
+	contact4: _contact4.text
 	FloatLayout:
 		Label:
 			color: 1,1,1,1
@@ -277,34 +285,38 @@ Builder.load_string("""
 			size_hint: 0.5,0.2
 			pos_hint: {"right":0.5, "top":0.4}
 		TextInput:
-			id: contact1
+			id: _contact1
 			multiline: False
+			text: root.contact1
 			size_hint: 0.5,0.2
 			pos_hint: {"right":1, "top":1}
 		TextInput:
-			id: contact2
+			id: _contact2
 			multiline: False
+			text: root.contact2
+			on_text_validate: message.focus = True
 			size_hint: 0.5,0.2
 			pos_hint: {"right":1, "top":0.8}
 		TextInput:
-			id: contact3
+			id: _contact3
 			multiline: False
+			text: root.contact3
+			on_text_validate: message.focus = True
 			size_hint: 0.5,0.2
 			pos_hint: {"right":1, "top":0.6}
 		TextInput:
-			id: contact4
+			id: _contact4
 			multiline: False
+			text: root.contact4
+			on_text_validate: message.focus = True
 			size_hint: 0.5,0.2
 			pos_hint: {"right":1, "top":0.4}
-		Contact_Home_Button:
-			contact_num1: contact1.text
-			contact_num2: contact2.text
-			contact_num3: contact3.text
-			contact_num4: contact4.text
+		Button:
 			color: 1,1,1,1
 			font_size: 25
 			size_hint: 1,0.2
 			text: "Home"
+			on_press: root.update()
 			on_release: app.root.current = "main"
 			pos_hint: {"right":1, "top":0.2}
 
@@ -325,28 +337,24 @@ class Text(Screen):
 	pass
 
 class ContactInput(Screen):
-	pass
+	def update(self,*args):
+		Main.contacts[0] = self.contact1
+		Main.contacts[1] = self.contact2
+		Main.contacts[2] = self.contact3
+		Main.contacts[3] = self.contact4
+
 
 class TextMessages(Screen):
-	pass
+	# User Input Text Message
+	sms_message = StringProperty()
 
 class ScreenManagement(ScreenManager):
 	pass
 
-# Create the class for each page
-class Contact_Home_Button(Button):
-	test_number = "16148057073"
-	# Contact Inputs
-	contact_num1 = StringProperty()
-	contact_num2 = StringProperty()
-	contact_num3 = StringProperty()
-	contact_num4 = StringProperty()
-
-
 
 class TextInput_HomeButton(Button):
-	# User Input Text Message
-	sms_message = StringProperty()
+	pass
+
 
 class UserInput_HomeButon(Button):
 	# User Info
@@ -354,13 +362,11 @@ class UserInput_HomeButon(Button):
 	uinfo_last = StringProperty()
 
 class IntentButton(Button):
-	message = TextInput_HomeButton.sms_message
-	Numbers = [Contact_Home_Button.contact_num1,
-			   Contact_Home_Button.contact_num2,
-			   Contact_Home_Button.contact_num3,
-			   Contact_Home_Button.contact_num4]
 	def send_text_message(self, *args):
-			  backend.send_sms(Contact_Home_Button.test_number,TextInput_HomeButton.sms_message)
+			client.api.account.messages.create(
+			    to=Main.contacts[0],
+			    from_="+13522928542",
+			    body="thisisnew")
 
 
 
@@ -375,6 +381,7 @@ screen_manager.add_widget(TextMessages(name="t_input"))
 
 # The class name must match the .kv file name
 class Main(App):
+	contacts = ['','','','']
 	def build(self):
 		return screen_manager
 
