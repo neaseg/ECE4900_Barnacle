@@ -116,6 +116,9 @@ Builder.load_string("""
 
 
 <User>:
+	user_firstname: firstname.text
+	user_lastname: lastname.text
+
 	FloatLayout:
 		Label:
 			color: 1,1,1,1
@@ -130,22 +133,23 @@ Builder.load_string("""
 			size_hint: 0.5,0.33
 			pos_hint: {"right":0.5, "top":0.66}
 		TextInput:
-			id: FirstName
+			id: firstname
+			text: root.user_firstname
 			multiline: False
 			size_hint: 0.5,0.33
 			pos_hint: {"right":1, "top":1}
 		TextInput:
-			id: LastName
+			id: lastname
+			text: root.user_lastname
 			multiline: False
 			size_hint: 0.5,0.33
 			pos_hint: {"right":1, "top":0.66}
 		UserInput_HomeButon:
-			uinfo_first: FirstName.text
-			uinfo_last: LastName.text
 			color: 1,1,1,1
 			font_size: 25
 			size_hint: 1,0.33
 			text: "Back Home"
+			on_press: root.update()
 			on_release: app.root.current = "main"
 			pos_hint: {"right":1, "bottom":1}
 
@@ -328,7 +332,9 @@ class Dial(Screen):
 	pass
 
 class User(Screen):
-	pass
+	def update(self,*args):
+		Main.user_info[0] = self.user_firstname
+		Main.user_info[1] = self.user_lastname
 
 class Text(Screen):
 	pass
@@ -376,9 +382,9 @@ class UserInput_HomeButon(Button):
 
 class IntentButton(Button):
 	def send_text_message(self, *args):
-			backend.send_sms(Main.contacts[0],Main.message)
-
-
+			for i in Main.contacts:
+				if i:
+					backend.send_sms(i,Main.message)
 
 screen_manager = ScreenManager()
 screen_manager.add_widget(HomePage(name="main"))
@@ -391,8 +397,9 @@ screen_manager.add_widget(TextMessages(name="t_input"))
 
 # The class name must match the .kv file name
 class Main(App):
-	contacts = ['','','','']
-	message = ''
+	contacts = ['','','',''] # can select contacts by Main.contacts
+	message = '' #can access messsage by using Main.message
+	user_info = ['',''] #access user information by using Main.user_info
 	def build(self):
 		return screen_manager
 
