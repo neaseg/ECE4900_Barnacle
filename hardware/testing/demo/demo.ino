@@ -4,6 +4,7 @@ lights up LED when data sent from phone to arduino
 sends data to phone when button pressed
 LED on pin 5, button on pin 6
 lights up LED to show when data is sent from device
+has knock sensor for when is gets knocked around
 **********/
 
 #include <Arduino.h>
@@ -18,10 +19,16 @@ lights up LED to show when data is sent from device
   #include <SoftwareSerial.h>
 #endif
 //pins 5 and 6 are free
-int inPin = 6;   //input pin for pushbutton
-int pinStat = 0; //variable for reading pin status
-int led = 5;
-int led_send = 3;
+int inPin = 6;   // input pin for pushbutton
+int pinStat = 0; // variable for reading pin status
+int led = 5;     // receive data led
+int led_send = 3;// send data led
+//const int ledP = 13;      // led connected to digital pin 13, not used at the moment
+const int knockSensor = A0; // the piezo is connected to analog pin 0
+const int threshold = 500;  // threshold value to decide when the detected sound is a knock or not
+int sensorReading = 0;      // variable to store the value read from the sensor pin
+int ledState = LOW;         // variable used to store the last LED status, to toggle the light
+
 /*=========================================================================
     APPLICATION SETTINGS
 
@@ -176,10 +183,29 @@ void loop(void)
     } 
   }
 */
-
-//send ascii 8 to the connected device
- pinStat = digitalRead(inPin); //read input pin
- if (pinStat == HIGH){    //if the button is pressed
+ // read the sensor and store it in the variable sensorReading:
+  sensorReading = analogRead(knockSensor);
+  if (sensorReading >= threshold) {
+    // toggle the status of the ledPin:
+    //ledState = !ledState;
+    // update the LED pin itself:
+    ble.print("AT+BLEUARTTX=");
+    ble.println(9);
+    
+    // check response stastus
+    if ( ble.waitForOK() ) {
+      digitalWrite(led_send, HIGH);
+      delay(500);
+      digitalWrite(led_send, LOW);
+    }
+    else {
+      Serial.println(F("Failed to send?"));
+    }
+  }
+  
+ //send ascii 8 to the connected device
+  pinStat = digitalRead(inPin); //read input pin
+  if (pinStat == HIGH){    //if the button is pressed
   //for(i=0;i<5;i++){
     ble.print("AT+BLEUARTTX=");
     ble.println(8);
@@ -205,6 +231,7 @@ void loop(void)
     // no data
     return;
   }
+  
   // Some data was found, its in the buffer
   Serial.print(F("[Recv] ")); Serial.println(ble.buffer);
   
