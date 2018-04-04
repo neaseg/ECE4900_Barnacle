@@ -3,6 +3,7 @@ demo for 4/3
 lights up LED when data sent from phone to arduino
 sends data to phone when button pressed
 LED on pin 5, button on pin 6
+lights up LED to show when data is sent from device
 **********/
 
 #include <Arduino.h>
@@ -20,6 +21,7 @@ LED on pin 5, button on pin 6
 int inPin = 6;   //input pin for pushbutton
 int pinStat = 0; //variable for reading pin status
 int led = 5;
+int led_send = 3;
 /*=========================================================================
     APPLICATION SETTINGS
 
@@ -90,6 +92,7 @@ void error(const __FlashStringHelper*err) {
 /**************************************************************************/
 void setup(void)
 {
+  pinMode(led_send, OUTPUT);
   pinMode(led, OUTPUT);
   pinMode(inPin, INPUT); //declare pushbutton as input
   //while (!Serial);  // required for Flora & Micro
@@ -182,11 +185,16 @@ void loop(void)
     ble.println(8);
     
     // check response stastus
-    if (! ble.waitForOK() ) {
+    if ( ble.waitForOK() ) {
+      digitalWrite(led_send, HIGH);
+      delay(500);
+      digitalWrite(led_send, LOW);
+    }
+    else {
       Serial.println(F("Failed to send?"));
     }
   pinStat = 0;
-  delay(500);//delay to allow person to take their finger off the button
+  //delay(500);//delay to allow person to take their finger off the button
  }
 
  
