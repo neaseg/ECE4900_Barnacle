@@ -2,12 +2,7 @@
 # implementation.
 # Author: Tony DiCola
 import Adafruit_BluefruitLE
-import main
 from Adafruit_BluefruitLE.services import UART
-
-
-# Get the BLE provider for the current platform.
-ble = Adafruit_BluefruitLE.get_provider()
 
 
 # Main function implements the program logic so it can run in a background
@@ -15,7 +10,6 @@ ble = Adafruit_BluefruitLE.get_provider()
 # asyncronous events like BLE actions.  All of the threading logic is taken care
 # of automatically though and you just need to provide a main function that uses
 # the BLE provider.
-
 def main(ans):
     # Clear any cached data because both bluez and CoreBluetooth have issues with
     # caching data and it going stale.
@@ -59,10 +53,9 @@ def main(ans):
         # Once service discovery is complete create an instance of the service
         # and start interacting with it.
         uart = UART(device)
-    finally:
+    else:
         pass
-
-    try:
+    while 1:
         # Now wait up to one minute to receive data from the device.
         print('Waiting up to 60 seconds to receive data from the device...')
         received = uart.read(timeout_sec=60)
@@ -76,8 +69,6 @@ def main(ans):
         else:
             # Timeout waiting for data, None is returned.
             print('Received no data!')
-    finally:
-        pass
 
 
 def bl():
