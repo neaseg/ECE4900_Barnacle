@@ -1,8 +1,11 @@
-# Example of interaction with a BLE UART device using a UART service
-# implementation.
-# Author: Tony DiCola
 import Adafruit_BluefruitLE
 from Adafruit_BluefruitLE.services import UART
+
+
+# Get the BLE provider for the current platform.
+ble = Adafruit_BluefruitLE.get_provider()
+# Initialize the BLE system.  MUST be called before other BLE calls!
+ble.initialize()
 
 
 # Main function implements the program logic so it can run in a background
@@ -44,17 +47,22 @@ def main(ans):
 
     # Once connected do everything else in a try/finally to make sure the device
     # is disconnected when done.
-    try:
+
+    beta = True;
+    while beta:
+        try:
         # Wait for service discovery to complete for the UART service.  Will
         # time out after 60 seconds (specify timeout_sec parameter to override).
-        print('Discovering services...')
-        UART.discover(device)
-
+            print('Discovering services...')
+            UART.discover(device)
         # Once service discovery is complete create an instance of the service
         # and start interacting with it.
-        uart = UART(device)
-    else:
-        pass
+            uart = UART(device)
+            beta = False;
+        finally:
+            print('Didnt connect initally. Trying again')
+
+
     while 1:
         # Now wait up to one minute to receive data from the device.
         print('Waiting up to 60 seconds to receive data from the device...')
@@ -73,8 +81,5 @@ def main(ans):
 
 def bl():
     ans = False
-    # Get the BLE provider for the current platform.
-    ble = Adafruit_BluefruitLE.get_provider()
-    ble.initialize()
     ble.run_mainloop_with(main(ans))
     return ans
