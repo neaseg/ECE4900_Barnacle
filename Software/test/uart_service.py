@@ -48,7 +48,7 @@ def main():
 
     # Once connected do everything else in a try/finally to make sure the device
     # is disconnected when done.
-    while 1:
+    try:
         # Wait for service discovery to complete for the UART service.  Will
         # time out after 60 seconds (specify timeout_sec parameter to override).
         print('Discovering services...')
@@ -57,17 +57,18 @@ def main():
         # Once service discovery is complete create an instance of the service
         # and start interacting with it.
         uart = UART(device)
-
-        # Write a string to the TX characteristic.
-        uart.write('Hello world!\r\n')
-        print("Sent 'Hello world!' to the device.")
-
+    else:
+        pass
+    while 1:
         # Now wait up to one minute to receive data from the device.
         print('Waiting up to 60 seconds to receive data from the device...')
         received = uart.read(timeout_sec=60)
         if received is not None:
             # Received data, print it out.
             print('Received: {0}'.format(received))
+            # Write a string to the TX characteristic.
+            print("Sent 'Hello world!' to the device.")
+            uart.write('Hello world!\r\n')
         else:
             # Timeout waiting for data, None is returned.
             print('Received no data!')
