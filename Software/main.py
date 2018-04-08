@@ -13,7 +13,6 @@ from kivy.uix.button import Button
 from kivy.properties import StringProperty, ObjectProperty
 from kivy.uix.widget import Widget
 import backend
-import uart_service
 import threading
 
 
@@ -397,8 +396,10 @@ class TextMessages(Screen):
 
 class BlueTooth(Screen):
 	def blth(self, *args):
-		if uart_service.bl():
-			IntentButton.send_text_message()
+		import uart_service
+		bluetooth_thread = threading.Thread(target=uart_service)
+		bluetooth_thread.start()
+			# IntentButton.send_text_message()
 
 
 

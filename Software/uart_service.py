@@ -13,7 +13,7 @@ ble.initialize()
 # asyncronous events like BLE actions.  All of the threading logic is taken care
 # of automatically though and you just need to provide a main function that uses
 # the BLE provider.
-def main(ans):
+def main():
     # Clear any cached data because both bluez and CoreBluetooth have issues with
     # caching data and it going stale.
     ble.clear_cached_data()
@@ -70,7 +70,6 @@ def main(ans):
         if received is not None:
             # Received data, print it out.
             print('Received: {0}'.format(received))
-            ans = True
             # Write a string to the TX characteristic.
             print("Sent 'Hello world!' to the device.")
             uart.write('Hello world!\r\n')
@@ -78,8 +77,4 @@ def main(ans):
             # Timeout waiting for data, None is returned.
             print('Received no data!')
 
-
-def bl():
-    ans = False
-    ble.run_mainloop_with(main(ans))
-    return ans
+ble.run_mainloop_with(main())
