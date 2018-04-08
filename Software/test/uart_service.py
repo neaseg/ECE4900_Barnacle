@@ -7,6 +7,13 @@ from Adafruit_BluefruitLE.services import UART
 
 # Get the BLE provider for the current platform.
 ble = Adafruit_BluefruitLE.get_provider()
+# Initialize the BLE system.  MUST be called before other BLE calls!
+ble.initialize()
+
+# Start the mainloop to process BLE events, and run the provided function in
+# a background thread.  When the provided main function stops running, returns
+# an integer status code, or throws an error the program will exit.
+ble.run_mainloop_with(main)
 
 
 # Main function implements the program logic so it can run in a background
@@ -77,12 +84,3 @@ def main():
         else:
             # Timeout waiting for data, None is returned.
             print('Received no data!')
-
-
-# Initialize the BLE system.  MUST be called before other BLE calls!
-ble.initialize()
-
-# Start the mainloop to process BLE events, and run the provided function in
-# a background thread.  When the provided main function stops running, returns
-# an integer status code, or throws an error the program will exit.
-ble.run_mainloop_with(main)

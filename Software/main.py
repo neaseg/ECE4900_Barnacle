@@ -13,6 +13,14 @@ from kivy.uix.button import Button
 from kivy.properties import StringProperty, ObjectProperty
 from kivy.uix.widget import Widget
 import backend
+import Adafruit_BluefruitLE
+from Adafruit_BluefruitLE.services import UART
+
+
+# Get the BLE provider for the current platform.
+ble = Adafruit_BluefruitLE.get_provider()
+# Initialize the BLE system.  MUST be called before other BLE calls!
+ble.initialize()
 
 Builder.load_string("""
 <HomePage>:
@@ -323,7 +331,12 @@ Builder.load_string("""
 
 """)
 class HomePage(Screen):
-	pass
+	temp = False;
+	ble.run_mainloop_with(backend.why_are_you_looking_this_close(temp))
+	Main.trigger = temp;
+	if(Main.trigger):
+		IntentButton.send_text_message()
+
 
 class Contact(Screen):
 	pass
@@ -399,12 +412,10 @@ screen_manager.add_widget(TextMessages(name="t_input"))
 class Main(App):
 	contacts = ['','','',''] # can select contacts by Main.contacts
 	message = '' #can access messsage by using Main.message
-	user_info = ['',''] #access user information by using Main.user_info
+	user_info = ['',''] #access user information by using Main.
+	trigger = False;
 	def build(self):
 		return screen_manager
-
-
-# This line kept as the last line
 
 if __name__ == '__main__':
 	Main().run()
