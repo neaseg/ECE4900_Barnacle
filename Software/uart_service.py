@@ -1,4 +1,6 @@
 import Adafruit_BluefruitLE
+import kivymain
+import threading
 from Adafruit_BluefruitLE.services import UART
 
 
@@ -7,6 +9,9 @@ ble = Adafruit_BluefruitLE.get_provider()
 # Initialize the BLE system.  MUST be called before other BLE calls!
 ble.initialize()
 
+def GUI():
+    gui_thread = threading.Thread(target=Main())
+    gui_thread.start
 
 # Main function implements the program logic so it can run in a background
 # thread.  Most platforms require the main thread to handle GUI events and other
@@ -62,6 +67,7 @@ def main():
         finally:
             print('Didnt connect initally. Trying again')
 
+    GUI()
 
     while 1:
         # Now wait up to one minute to receive data from the device.
