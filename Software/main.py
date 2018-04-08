@@ -21,6 +21,7 @@ import threading
 ble = Adafruit_BluefruitLE.get_provider()
 # Initialize the BLE system.  MUST be called before other BLE calls!
 ble.initialize()
+ble.clear_cached_data()
 
 Builder.load_string("""
 <HomePage>:
@@ -414,7 +415,7 @@ class IntentButton(Button):
 def why_are_you_looking_this_close(trigger):
     # Clear any cached data because both bluez and CoreBluetooth have issues with
     # caching data and it going stale.
-    ble.clear_cached_data()
+    #ble.clear_cached_data()
 
     # Get the first available BLE network adapter and make sure it's powered on.
     adapter = ble.get_default_adapter()
