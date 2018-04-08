@@ -13,7 +13,7 @@ from kivy.uix.button import Button
 from kivy.properties import StringProperty, ObjectProperty
 from kivy.uix.widget import Widget
 import backend
-import uart_service
+#import uart_service
 import threading
 
 
@@ -36,6 +36,14 @@ Builder.load_string("""
 			text: "Welcome to TIMBER!"
 			pos_hint: {"left":1, "top":1}
 
+	FloatLayout:
+		Button:
+			color: 1,1,1,1
+			font_size: 15
+			size_hint: 0.20,0.20
+			text: "Connect to Bluetooth"
+			on_release: app.root.current = 'blth_connect'
+			pos_hint: {"left":1, "bottom":1}
 
 	FloatLayout:
 		Button:
@@ -324,6 +332,23 @@ Builder.load_string("""
 			on_release: app.root.current = "main"
 			pos_hint: {"right":1, "top":0.2}
 
+<BlueTooth>:
+	FloatLayout:
+		Button:
+			color: 1,1,1,1
+			font_size: 25
+			size_hint: 0.5,0.2
+			text: "Connect to Bluetooth"
+			on_release: app.root.current = "main"
+			pos_hint: {"right":0.5, "bottom":1}
+		Button:
+			color: 1,1,1,1
+			font_size: 25
+			size_hint: 0.5,0.2
+			text: "Home"
+			on_release: app.root.current = "main"
+			pos_hint: {"right":1, "bottom":1}
+
 """)
 class HomePage(Screen):
 	pass
@@ -370,6 +395,9 @@ class TextMessages(Screen):
 	def update(self,*args):
 		Main.message = self.message4
 
+class BlueTooth(Screen):
+	pass
+
 class ScreenManagement(ScreenManager):
 	pass
 
@@ -389,9 +417,6 @@ class IntentButton(Button):
 				if i:
 					backend.send_sms(i,Main.message)
 
-class bluetooth:
-	pass
-
 
 screen_manager = ScreenManager()
 screen_manager.add_widget(HomePage(name="main"))
@@ -401,6 +426,7 @@ screen_manager.add_widget(User(name="other3"))
 screen_manager.add_widget(Text(name="other4"))
 screen_manager.add_widget(ContactInput(name="c_input"))
 screen_manager.add_widget(TextMessages(name="t_input"))
+screen_manager.add_widget(BlueTooth(name="blth_connect"))
 
 # The class name must match the .kv file name
 class Main(App):
