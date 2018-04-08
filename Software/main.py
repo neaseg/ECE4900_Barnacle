@@ -334,9 +334,6 @@ Builder.load_string("""
 """)
 class HomePage(Screen):
 	pass
-	# if(trigger):
-	# 	IntentButton.send_text_message()
-
 
 class Contact(Screen):
 	pass
@@ -400,22 +397,32 @@ class IntentButton(Button):
 					backend.send_sms(i,Main.message)
 
 	def activate(self, *args):
-		ble.run_mainloop_with(why_are_you_looking_this_close(Main.trigger))
-		if Main.trigger:
-			send_text_message
+			received = Main.uart.read(timeout_sec=60)
+			if received is not None:
+				# Received data, print it out.
+				print('Received: {0}'.format(received))
+				# Write a string to the TX characteristic.
+				self.send_text_message
+	        	print("Sent 'Hello world!' to the device.")
+	        	Main.uart.write('Hello world!\r\n')
+			# else:
+			# 	# Timeout waiting for data, None is returned.
+			# 	print('Received no data!')
 
+screen_manager = ScreenManager()
+screen_manager.add_widget(HomePage(name="main"))
+screen_manager.add_widget(Contact(name="other1"))
+screen_manager.add_widget(Dial(name="other2"))
+screen_manager.add_widget(User(name="other3"))
+screen_manager.add_widget(Text(name="other4"))
+screen_manager.add_widget(ContactInput(name="c_input"))
+screen_manager.add_widget(TextMessages(name="t_input"))
 
-
-
-# Main function implements the program logic so it can run in a background
-# thread.  Most platforms require the main thread to handle GUI events and other
-# asyncronous events like BLE actions.  All of the threading logic is taken care
-# of automatically though and you just need to provide a main function that uses
-# the BLE provider.
-def why_are_you_looking_this_close(trigger):
-    # Clear any cached data because both bluez and CoreBluetooth have issues with
+# The class name must match the .kv file name
+class Main(App):
+	# Clear any cached data because both bluez and CoreBluetooth have issues with
     # caching data and it going stale.
-    #ble.clear_cached_data()
+    ble.clear_cached_data()
 
     # Get the first available BLE network adapter and make sure it's powered on.
     adapter = ble.get_default_adapter()
@@ -446,8 +453,6 @@ def why_are_you_looking_this_close(trigger):
 
     # Once connected do everything else in a try/finally to make sure the device
     # is disconnected when done.
-
-    beta = True;
     while beta:
         try:
         # Wait for service discovery to complete for the UART service.  Will
@@ -461,36 +466,6 @@ def why_are_you_looking_this_close(trigger):
         finally:
             print('Didnt connect initally. Trying again')
 
-
-    try:
-		# Now wait up to 20 seconds to receive data from the device.
-        print('Waiting up to 20 seconds to receive data from the device...')
-        received = uart.read(timeout_sec=20)
-        if received is not None:
-            # Received data, print it out.
-            print('Received: {0}'.format(received))
-            # Write a string to the TX characteristic.
-            print("Sent 'Hello world!' to the device.")
-            uart.write('Hello world!\r\n')
-            trigger = True;
-        else:
-            # Timeout waiting for data, None is returned.
-            print('Received no data!')
-    finally:
-    	device.disconnect()
-
-
-screen_manager = ScreenManager()
-screen_manager.add_widget(HomePage(name="main"))
-screen_manager.add_widget(Contact(name="other1"))
-screen_manager.add_widget(Dial(name="other2"))
-screen_manager.add_widget(User(name="other3"))
-screen_manager.add_widget(Text(name="other4"))
-screen_manager.add_widget(ContactInput(name="c_input"))
-screen_manager.add_widget(TextMessages(name="t_input"))
-
-# The class name must match the .kv file name
-class Main(App):
 	contacts = ['','','',''] # can select contacts by Main.contacts
 	message = '' #can access messsage by using Main.message
 	user_info = ['',''] #access user information by using Main.
@@ -499,4 +474,4 @@ class Main(App):
 		return screen_manager
 
 if __name__ == '__main__':
-	Main().run()
+	ble.run_mainloop_with(Main)
