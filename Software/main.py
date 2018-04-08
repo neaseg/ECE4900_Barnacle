@@ -13,7 +13,7 @@ from kivy.uix.button import Button
 from kivy.properties import StringProperty, ObjectProperty
 from kivy.uix.widget import Widget
 import backend
-#import uart_service
+import uart_service
 import threading
 
 
@@ -339,7 +339,7 @@ Builder.load_string("""
 			font_size: 25
 			size_hint: 0.5,0.2
 			text: "Connect to Bluetooth"
-			on_release: app.root.current = "main"
+			on_release: root.blth()
 			pos_hint: {"right":0.5, "bottom":1}
 		Button:
 			color: 1,1,1,1
@@ -396,7 +396,11 @@ class TextMessages(Screen):
 		Main.message = self.message4
 
 class BlueTooth(Screen):
-	pass
+	def blth(self, *args):
+		if uart_service.bl():
+			IntentButton.send_text_message()
+
+
 
 class ScreenManagement(ScreenManager):
 	pass

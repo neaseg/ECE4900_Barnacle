@@ -16,7 +16,7 @@ ble = Adafruit_BluefruitLE.get_provider()
 # of automatically though and you just need to provide a main function that uses
 # the BLE provider.
 
-def main():
+def main(ans):
     # Clear any cached data because both bluez and CoreBluetooth have issues with
     # caching data and it going stale.
     ble.clear_cached_data()
@@ -69,6 +69,7 @@ def main():
         if received is not None:
             # Received data, print it out.
             print('Received: {0}'.format(received))
+            ans = True
             # Write a string to the TX characteristic.
             print("Sent 'Hello world!' to the device.")
             uart.write('Hello world!\r\n')
@@ -79,11 +80,10 @@ def main():
         pass
 
 
-def bl(b):
-    if b:
-        # Get the BLE provider for the current platform.
-        ble = Adafruit_BluefruitLE.get_provider()
-        ble.initialize()
-        ble.run_mainloop_with(main)
-    else:
-        pass
+def bl():
+    ans = False
+    # Get the BLE provider for the current platform.
+    ble = Adafruit_BluefruitLE.get_provider()
+    ble.initialize()
+    ble.run_mainloop_with(main(ans))
+    return ans
