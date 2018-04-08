@@ -49,7 +49,7 @@ def main():
     # Once connected do everything else in a try/finally to make sure the device
     # is disconnected when done.
 
-    beta = true;
+    beta = True;
     while beta:
         try:
         # Wait for service discovery to complete for the UART service.  Will
@@ -59,7 +59,7 @@ def main():
         # Once service discovery is complete create an instance of the service
         # and start interacting with it.
             uart = UART(device)
-            beta = false;
+            beta = False;
         finally:
             print('Didnt connect initally. Trying again')
 
