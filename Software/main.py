@@ -498,7 +498,6 @@ screen_manager.add_widget(TextMessages(name="t_input"))
 screen_manager.add_widget(BlueTooth(name="blth_connect"))
 
 
-
 # The class name must match the .kv file name
 class Main(App):
 	contacts = ['','','',''] # can select contacts by Main.contacts
