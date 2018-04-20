@@ -12,10 +12,15 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.button import Button
 from kivy.properties import StringProperty, ObjectProperty
 from kivy.uix.widget import Widget
+import backend
 import Adafruit_BluefruitLE
 from Adafruit_BluefruitLE.services import UART
-import backend
 import threading
+
+# Get the BLE provider for the current platform.
+ble = Adafruit_BluefruitLE.get_provider()
+# Initialize the BLE system.  MUST be called before other BLE calls!
+ble.initialize()
 
 Builder.load_string("""
 <HomePage>:
@@ -36,14 +41,6 @@ Builder.load_string("""
 			text: "Welcome to TIMBER!"
 			pos_hint: {"left":1, "top":1}
 
-	FloatLayout:
-		Button:
-			color: 1,1,1,1
-			font_size: 15
-			size_hint: 0.20,0.20
-			text: "Connect to Bluetooth"
-			on_release: app.root.current = 'blth_connect'
-			pos_hint: {"left":1, "bottom":1}
 
 	FloatLayout:
 		Button:
@@ -332,26 +329,74 @@ Builder.load_string("""
 			on_release: app.root.current = "main"
 			pos_hint: {"right":1, "top":0.2}
 
-<BlueTooth>:
-	FloatLayout:
-		Button:
-			color: 1,1,1,1
-			font_size: 25
-			size_hint: 0.5,0.2
-			text: "Connect to Bluetooth"
-			on_release: root.blth()
-			pos_hint: {"right":0.5, "bottom":1}
-		Button:
-			color: 1,1,1,1
-			font_size: 25
-			size_hint: 0.5,0.2
-			text: "Home"
-			on_release: app.root.current = "main"
-			pos_hint: {"right":1, "bottom":1}
-
 """)
 class HomePage(Screen):
-	pass
+	def discover_device():
+	    # Clear any cached data because both bluez and CoreBluetooth have issues with
+	    # caching data and it going stale.
+		ble.clear_cached_data()
+	    # Get the first available BLE network adapter and make sure it's powered on.
+		adapter = ble.get_default_adapter()
+		adapter.power_on()
+		print('Using adapter: {0}'.format(adapter.name))
+		# Disconnect any currently connected UART devices.  Good for cleaning up and
+		# starting from a fresh state.
+		print('Disconnecting any connected UART devices...')
+		UART.disconnect_devices()
+		# Scan for UART devices.
+		print('Searching for UART device...')
+		try:
+			adapter.start_scan()
+			# Search for the first UART device found (will time out after 60 seconds
+			# but you can specify an optional timeout_sec parameter to change it).
+			device = UART.find_device()
+			if device is None:
+				raise RuntimeError('Failed to find UART device!')
+		finally:
+	        # Make sure scanning is stopped before exiting.
+			adapter.stop_scan()
+
+			print('Connecting to device...')
+			device.connect()# Will time out after 60 seconds, specify timeout_sec parameter
+	                      # to change the timeout.
+	    # Once connected do everything else in a try/finally to make sure the device
+	    # is disconnected when done.
+	        # Wait for service discovery to complete for the UART service.  Will
+	        # time out after 60 seconds (specify timeout_sec parameter to override).
+			print('Discovering services...')
+			UART.discover(device)
+	        # Once service discovery is complete create an instance of the service
+	        # and start interacting with it.
+			uart = UART(device)
+			return uart
+
+	def message_device(uart):
+	    # Write a string to the TX characteristic.
+	    uart.write('Hello world!\r\n')
+	    print("Sent 'Hello world!' to the device.")
+
+
+	        # Now wait up to one minute to receive data from the device.
+	def recieve_message(uart):
+		ans = False
+		received = uart.read(timeout_sec=5)
+		if received is not None:
+			# Received data, print it out.
+			print('Received: {0}'.format(received))
+			ans = True
+			return ans
+
+	def run_toggle(self,*args):
+		if (Main.startup):
+			Main.startup = False;
+		else:
+			if Main.uart is None:
+				Main.uart = discover_device()
+			else:
+				if(recieve_message(Main.uart)):
+					IntentButton.send_text_message()
+
+	run_toggle
 
 class Contact(Screen):
 	pass
@@ -395,78 +440,6 @@ class TextMessages(Screen):
 	def update(self,*args):
 		Main.message = self.message4
 
-class BlueTooth(Screen):
-	# Get the BLE provider for the current platform.
-	ble = Adafruit_BluefruitLE.get_provider()
-	# Initialize the BLE system.  MUST be called before other BLE calls!
-	ble.initialize()
-	def blth(self, *args):
-	    # Clear any cached data because both bluez and CoreBluetooth have issues with
-	    # caching data and it going stale.
-	    self.ble.clear_cached_data()
-
-	    # Get the first available BLE network adapter and make sure it's powered on.
-	    adapter = self.ble.get_default_adapter()
-	    adapter.power_on()
-	    print('Using adapter: {0}'.format(adapter.name))
-
-	    # Disconnect any currently connected UART devices.  Good for cleaning up and
-	    # starting from a fresh state.
-	    print('Disconnecting any connected UART devices...')
-	    UART.disconnect_devices()
-
-	    # Scan for UART devices.
-	    print('Searching for UART device...')
-	    try:
-	        adapter.start_scan()
-	        # Search for the first UART device found (will time out after 60 seconds
-	        # but you can specify an optional timeout_sec parameter to change it).
-	        device = UART.find_device()
-	        if device is None:
-	            raise RuntimeError('Failed to find UART device!')
-	    finally:
-	        # Make sure scanning is stopped before exiting.
-	        adapter.stop_scan()
-
-	    print('Connecting to device...')
-	    device.connect()  # Will time out after 60 seconds, specify timeout_sec parameter
-	                      # to change the timeout.
-
-	    # Once connected do everything else in a try/finally to make sure the device
-	    # is disconnected when done.
-
-	    beta = True;
-	    while beta:
-	        try:
-	        # Wait for service discovery to complete for the UART service.  Will
-	        # time out after 60 seconds (specify timeout_sec parameter to override).
-	            print('Discovering services...')
-	            UART.discover(device)
-	        # Once service discovery is complete create an instance of the service
-	        # and start interacting with it.
-	            uart = UART(device)
-	            beta = False;
-	        finally:
-	            print('Didnt connect initally. Trying again')
-
-
-	    while 1:
-	        # Now wait up to one minute to receive data from the device.
-	        print('Waiting up to 60 seconds to receive data from the device...')
-	        received = uart.read(timeout_sec=60)
-	        if received is not None:
-	            # Received data, print it out.
-				IntentButton().send_text_message()
-				print('Received: {0}'.format(received))
-	            # Write a string to the TX characteristic.
-				print("Sent 'Hello world!' to the device.")
-				uart.write('Hello world!\r\n')
-	        else:
-	            # Timeout waiting for data, None is returned.
-	            print('Received no data!')
-
-
-
 class ScreenManagement(ScreenManager):
 	pass
 
@@ -487,6 +460,13 @@ class IntentButton(Button):
 					backend.send_sms(i,Main.message)
 
 
+# Main function implements the program logic so it can run in a background
+# thread.  Most platforms require the main thread to handle GUI events and other
+# asyncronous events like BLE actions.  All of the threading logic is taken care
+# of automatically though and you just need to provide a main function that uses
+# the BLE provider.
+
+
 screen_manager = ScreenManager()
 screen_manager.add_widget(HomePage(name="main"))
 screen_manager.add_widget(Contact(name="other1"))
@@ -495,9 +475,6 @@ screen_manager.add_widget(User(name="other3"))
 screen_manager.add_widget(Text(name="other4"))
 screen_manager.add_widget(ContactInput(name="c_input"))
 screen_manager.add_widget(TextMessages(name="t_input"))
-screen_manager.add_widget(BlueTooth(name="blth_connect"))
-
-
 
 # The class name must match the .kv file name
 class Main(App):

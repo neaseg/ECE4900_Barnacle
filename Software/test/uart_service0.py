@@ -7,13 +7,6 @@ from Adafruit_BluefruitLE.services import UART
 
 # Get the BLE provider for the current platform.
 ble = Adafruit_BluefruitLE.get_provider()
-# Initialize the BLE system.  MUST be called before other BLE calls!
-ble.initialize()
-
-# Start the mainloop to process BLE events, and run the provided function in
-# a background thread.  When the provided main function stops running, returns
-# an integer status code, or throws an error the program will exit.
-ble.run_mainloop_with(main)
 
 
 # Main function implements the program logic so it can run in a background
@@ -55,22 +48,17 @@ def main():
 
     # Once connected do everything else in a try/finally to make sure the device
     # is disconnected when done.
-
-    beta = True;
-    while beta:
-        try:
+    try:
         # Wait for service discovery to complete for the UART service.  Will
         # time out after 60 seconds (specify timeout_sec parameter to override).
-            print('Discovering services...')
-            UART.discover(device)
+        print('Discovering services...')
+        UART.discover(device)
+
         # Once service discovery is complete create an instance of the service
         # and start interacting with it.
-            uart = UART(device)
-            beta = False;
-        finally:
-            print('Didnt connect initally. Trying again')
-
-
+        uart = UART(device)
+    else:
+        pass
     while 1:
         # Now wait up to one minute to receive data from the device.
         print('Waiting up to 60 seconds to receive data from the device...')
@@ -84,3 +72,12 @@ def main():
         else:
             # Timeout waiting for data, None is returned.
             print('Received no data!')
+
+
+# Initialize the BLE system.  MUST be called before other BLE calls!
+ble.initialize()
+
+# Start the mainloop to process BLE events, and run the provided function in
+# a background thread.  When the provided main function stops running, returns
+# an integer status code, or throws an error the program will exit.
+ble.run_mainloop_with(main)
