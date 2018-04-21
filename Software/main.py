@@ -407,7 +407,7 @@ class BlueTooth(Screen):
 
 	    # Get the first available BLE network adapter and make sure it's powered on.
 	    adapter = self.ble.get_default_adapter()
-	    adapter.power_on()
+	    #adapter.power_on()
 	    print('Using adapter: {0}'.format(adapter.name))
 
 	    # Disconnect any currently connected UART devices.  Good for cleaning up and

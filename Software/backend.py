@@ -1,5 +1,4 @@
 from twilio.rest import Client
-import googlemaps
 from datetime import datetime
 import uuid
 import json
