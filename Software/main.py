@@ -339,7 +339,7 @@ Builder.load_string("""
 			font_size: 25
 			size_hint: 0.5,0.2
 			text: "Connect to Bluetooth"
-			on_release: root.blth()
+			on_release: root.real()
 			pos_hint: {"right":0.5, "bottom":1}
 		Button:
 			color: 1,1,1,1
@@ -400,6 +400,12 @@ class BlueTooth(Screen):
 	ble = Adafruit_BluefruitLE.get_provider()
 	# Initialize the BLE system.  MUST be called before other BLE calls!
 	ble.initialize()
+
+	def real(self, *args):
+		self.ble.run_mainloop_with(blth)
+
+
+
 	def blth(self, *args):
 	    # Clear any cached data because both bluez and CoreBluetooth have issues with
 	    # caching data and it going stale.
