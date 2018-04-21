@@ -188,7 +188,7 @@ Builder.load_string("""
 			pos_hint: {"right":0.5, "bottom":1}
 <TextMessages>:
 	message1: 'Your loved one is in distress, and needs immediate medical attention.'
-	message2: 'Your loved one is in distress, and needs immediate medical attention.'
+	message2: 'An individual is in distress and seeks immediate medical attention.'
 	message3: "The user has collapsed and requires immediate medical attention"
 	message4: _message4.text
 	sms_message: ''
@@ -204,14 +204,14 @@ Builder.load_string("""
 			id: message2
 			color: 1,1,1,1
 			font_size: 20
-			text: "Your loved one is in distress, and needs immediate medical attention."
+			text: "An individual is in distress and seeks immediate medical attention."
 			size_hint: 0.8,0.2
 			pos_hint: {"right":0.8, "top":0.8}
 		Label:
 			id: message3
 			color: 1,1,1,1
 			font_size: 20
-			text: "The user has collapsed and requires immediate medical attention"
+			text: "The user has collapsed and requires immediate medical attention."
 			size_hint: 0.8,0.2
 			pos_hint: {"right":0.8, "top":0.6}
 		TextInput:
@@ -377,7 +377,7 @@ class ContactInput(Screen):
 
 class TextMessages(Screen):
 	message1 = 'Your loved one is in distress, and needs immediate medical attention.'
-	message2 = 'Your loved one is in distress, and needs immediate medical attention.'
+	message2 = 'An individual is in distress and seeks immediate medical attention.'
 	message3 = "The user has collapsed and requires immediate medical attention"
 
 	def message1_update(self, *args):
