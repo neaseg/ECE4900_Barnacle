@@ -17,6 +17,12 @@ from Adafruit_BluefruitLE.services import UART
 import backend
 import threading
 
+
+# Get the BLE provider for the current platform.
+ble = Adafruit_BluefruitLE.get_provider()
+# Initialize the BLE system.  MUST be called before other BLE calls!
+ble.initialize()
+
 Builder.load_string("""
 <HomePage>:
 	FloatLayout:
@@ -396,23 +402,14 @@ class TextMessages(Screen):
 		Main.message = self.message4
 
 class BlueTooth(Screen):
-	# Get the BLE provider for the current platform.
-	ble = Adafruit_BluefruitLE.get_provider()
-	# Initialize the BLE system.  MUST be called before other BLE calls!
-	ble.initialize()
-
-	def real(self, *args):
-		self.ble.run_mainloop_with(blth)
-
-
 
 	def blth(self, *args):
 	    # Clear any cached data because both bluez and CoreBluetooth have issues with
 	    # caching data and it going stale.
-	    self.ble.clear_cached_data()
+	    ble.clear_cached_data()
 
 	    # Get the first available BLE network adapter and make sure it's powered on.
-	    adapter = self.ble.get_default_adapter()
+	    adapter = ble.get_default_adapter()
 	    #adapter.power_on()
 	    print('Using adapter: {0}'.format(adapter.name))
 
