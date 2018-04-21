@@ -68,9 +68,9 @@ def send_sms(number,message):
         to=number,
         from_="+13522928542",
         body=gps_m)
-        
+
     client.calls.create(
-    to="number",
+    to=number,
     from_="+13522928542",
     url="http://raw.githubusercontent.com/ulnneverknow/temp/master/danger.xml"
 )
