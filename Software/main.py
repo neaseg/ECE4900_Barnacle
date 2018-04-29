@@ -15,7 +15,14 @@ from kivy.uix.widget import Widget
 import Adafruit_BluefruitLE
 from Adafruit_BluefruitLE.services import UART
 import backend
+import uart_service1
 import threading
+from multiprocessing import Pool
+import time
+import os.path
+import os
+from pathlib2 import Path
+
 
 Builder.load_string("""
 <HomePage>:
@@ -396,79 +403,26 @@ class TextMessages(Screen):
 		Main.message = self.message4
 
 class BlueTooth(Screen):
-	# Get the BLE provider for the current platform.
-	ble = Adafruit_BluefruitLE.get_provider()
-	# Initialize the BLE system.  MUST be called before other BLE calls!
-	ble.initialize()
-
-
+	trigger = None;
 	def blth_thread(self, *args):
-		threading.Thread(target = self.blth).start()
+		t2 = threading.Thread(target=self.trigger_thread)
+		t1 = threading.Thread(target=uart_service1.run)
+		t2.start()
+		t1.start()
 
-	def blth(self, *args):
-	    # Clear any cached data because both bluez and CoreBluetooth have issues with
-	    # caching data and it going stale.
-	    self.ble.clear_cached_data()
-
-	    # Get the first available BLE network adapter and make sure it's powered on.
-	    adapter = self.ble.get_default_adapter()
-	    #adapter.power_on()
-	    print('Using adapter: {0}'.format(adapter.name))
-
-	    # Disconnect any currently connected UART devices.  Good for cleaning up and
-	    # starting from a fresh state.
-	    print('Disconnecting any connected UART devices...')
-	    UART.disconnect_devices()
-
-	    # Scan for UART devices.
-	    print('Searching for UART device...')
-	    try:
-	        adapter.start_scan()
-	        # Search for the first UART device found (will time out after 60 seconds
-	        # but you can specify an optional timeout_sec parameter to change it).
-	        device = UART.find_device()
-	        if device is None:
-	            raise RuntimeError('Failed to find UART device!')
-	    finally:
-	        # Make sure scanning is stopped before exiting.
-	        adapter.stop_scan()
-
-	    print('Connecting to device...')
-	    device.connect()  # Will time out after 60 seconds, specify timeout_sec parameter
-	                      # to change the timeout.
-
-	    # Once connected do everything else in a try/finally to make sure the device
-	    # is disconnected when done.
-
-	    beta = True;
-	    while beta:
-	        try:
-	        # Wait for service discovery to complete for the UART service.  Will
-	        # time out after 60 seconds (specify timeout_sec parameter to override).
-	            print('Discovering services...')
-	            UART.discover(device)
-	        # Once service discovery is complete create an instance of the service
-	        # and start interacting with it.
-	            uart = UART(device)
-	            beta = False;
-	        finally:
-	            print('Didnt connect initally. Trying again')
-
-
-	    while 1:
-	        # Now wait up to one minute to receive data from the device.
-	        print('Waiting up to 60 seconds to receive data from the device...')
-	        received = uart.read(timeout_sec=60)
-	        if received is not None:
-	            # Received data, print it out.
-				IntentButton().send_text_message()
-				print('Received: {0}'.format(received))
-	            # Write a string to the TX characteristic.
-				print("Sent 'Hello world!' to the device.")
-				uart.write('Hello world!\r\n')
-	        else:
-	            # Timeout waiting for data, None is returned.
-	            print('Received no data!')
+	def trigger_thread(self, *args):
+	    while(1):
+	        print ('oh yeah')
+	        time.sleep(1)
+	        file_path = Path("testfile.txt")
+	        if file_path.exists():
+	            print('fuck you garret')
+	            file = open("testfile.txt","r")
+	            if file.read(1) is not None:
+					IntentButton().send_text_message()
+					print('WE DID IT')
+					self.trigger = True
+					os.remove("testfile.txt")
 
 
 

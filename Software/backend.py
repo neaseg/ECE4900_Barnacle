@@ -4,9 +4,13 @@ import uuid
 import json
 import urllib2
 import requests
+import time
+import os.path
+from pathlib2 import Path
 
 
-#ble.run_mainloop_with(backend.why_are_you_looking_this_close)
+
+
 
 # Find these values at https://twilio.com/user/account
 account_sid = "AC63957f26fab90921c4d410f722425ab7"

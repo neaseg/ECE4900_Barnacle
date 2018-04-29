@@ -3,9 +3,8 @@
 # Author: Tony DiCola
 import Adafruit_BluefruitLE
 from Adafruit_BluefruitLE.services import UART
-import time
 
-
+mario = []
 # Get the BLE provider for the current platform.
 ble = Adafruit_BluefruitLE.get_provider()
 # Initialize the BLE system.  MUST be called before other BLE calls!
@@ -22,7 +21,7 @@ ble.initialize()
 # asyncronous events like BLE actions.  All of the threading logic is taken care
 # of automatically though and you just need to provide a main function that uses
 # the BLE provider.
-def main(trigger):
+def main():
     # Clear any cached data because both bluez and CoreBluetooth have issues with
     # caching data and it going stale.
     ble.clear_cached_data()
@@ -73,26 +72,21 @@ def main(trigger):
 
 
     while 1:
-        time.sleep(1)
         # Now wait up to one minute to receive data from the device.
         print('Waiting up to 60 seconds to receive data from the device...')
-        received = uart.read(timeout_sec=60)
+        received = uart.read(timeout_sec=20)
         if received is not None:
             # Received data, print it out.
             print('Received: {0}'.format(received))
             # Write a string to the TX characteristic.
             print("Sent 'Hello world!' to the device.")
             uart.write('Hello world!\r\n')
-            trigger = received;
+            file = open("testfile.txt","w")
+            file.write(received)
+            file.close
         else:
             # Timeout waiting for data, None is returned.
             print('Received no data!')
-            trigger = recieved
 
-
-def run(trigger):
-    #Get the BLE provider for the current platform.
-    ble = Adafruit_BluefruitLE.get_provider()
-    # Initialize the BLE system.  MUST be called before other BLE calls!
-    ble.initialize()
-    ble.run_mainloop_with(main(trigger))
+def run():
+    ble.run_mainloop_with(main)
