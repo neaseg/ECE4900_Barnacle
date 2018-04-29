@@ -15,7 +15,6 @@ from kivy.uix.widget import Widget
 import Adafruit_BluefruitLE
 from Adafruit_BluefruitLE.services import UART
 import backend
-import uart_service1
 import threading
 from multiprocessing import Pool
 import time
