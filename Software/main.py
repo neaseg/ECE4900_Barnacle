@@ -406,21 +406,21 @@ class BlueTooth(Screen):
 	trigger = None;
 	def blth_thread(self, *args):
 		t2 = threading.Thread(target=self.trigger_thread)
-		t1 = threading.Thread(target=uart_service1.run)
+		t1 = threading.Thread(target=backend.run)
 		t2.start()
 		t1.start()
 
 	def trigger_thread(self, *args):
 	    while(1):
-	        print ('oh yeah')
+	        print ('Checking for trigger file')
 	        time.sleep(1)
 	        file_path = Path("testfile.txt")
 	        if file_path.exists():
-	            print('fuck you garret')
+	            print('Trigger has been detected')
 	            file = open("testfile.txt","r")
 	            if file.read(1) is not None:
 					IntentButton().send_text_message()
-					print('WE DID IT')
+					print('Sending Text Messages')
 					self.trigger = True
 					os.remove("testfile.txt")
 
