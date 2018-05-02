@@ -92,10 +92,6 @@ def run():
 
 
 
-# Find these values at https://twilio.com/user/account
-account_sid = "AC63957f26fab90921c4d410f722425ab7"
-auth_token = "89191cd5fa173f9a4e4539adf33ec27c"
-
 client = Client(account_sid, auth_token)
 
 def macAddress():
